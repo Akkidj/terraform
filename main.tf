@@ -63,7 +63,7 @@ resource "aws_instance" "akdj" {
   iam_instance_profile = aws_iam_instance_profile.test_profile.name
  vpc_security_group_ids = [aws_security_group.allow_tls.id] 
   user_data = <<EOF
-  #!/bin/bash
+#!/bin/bash
 BUCKET=bhopali-buc
 sudo dnf install java-11-amazon-corretto -y
 wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.91/bin/apache-tomcat-8.5.91.zip
