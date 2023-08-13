@@ -62,6 +62,19 @@ resource "aws_instance" "akdj" {
   key_name      = "ak"
   iam_instance_profile = aws_iam_instance_profile.test_profile.name
  vpc_security_group_ids = [aws_security_group.allow_tls.id] 
+  user_data = <<EOF
+  #!/bin/bash
+BUCKET=bhopali-buc
+sudo dnf install java-11-amazon-corretto -y
+wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.91/bin/apache-tomcat-8.5.91.zip
+sudo unzip apache-tomcat-8.5.91.zip
+sudo mv apache-tomcat-8.5.91 /mnt/tomcat
+KEY=`aws s3 ls $BUCKET --recursive | sort | tail -n 1 | awk '{print $4}'`
+aws s3 cp s3://$BUCKET/$KEY /mnt/tomcat/webapps/
+sudo chmod 0755 /mnt/tomcat/bin/*
+sudo ./bin/catalina.sh start
+EOF
+
 }
 
 
@@ -73,6 +86,13 @@ resource "aws_security_group" "allow_tls" {
     description      = "TLS from VPC"
     from_port        = 22
     to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+   }
+   ingress {
+    description      = "TLS from VPC"
+    from_port        = 8080
+    to_port          = 8080
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
    }
